@@ -162,8 +162,13 @@ function updateAct() {
   /* 他在旁边时多给一个「说说话」，牵手和聊天不打架 */
   if (el2) {
     if (NEAR.id === 'him' && TD.scene !== 'beach') {
-      el2.style.left = px + 'px';
-      el2.style.top = (py + 32) + 'px';
+      if (VIEW_ROT) {
+        el2.style.left = (px - 36) + 'px';
+        el2.style.top = py + 'px';
+      } else {
+        el2.style.left = px + 'px';
+        el2.style.top = (py + 32) + 'px';
+      }
       const sp2 = el2.firstElementChild;
       if (sp2 && sp2.textContent !== '说说话') sp2.textContent = '说说话';
       el2.classList.add('show');
@@ -1536,6 +1541,7 @@ function resize() {
     VIEW.style.borderRadius = '0';
     VIEW_ROT = true;
     document.body.classList.add('rot');
+    placeFollowUI(true);
     showRotateTip(true);
   } else {
     const s = Math.min(vw / LOGIC_W, vh / LOGIC_H) * 0.97;
@@ -1552,6 +1558,7 @@ function resize() {
     VIEW.style.borderRadius = '';
     VIEW_ROT = false;
     document.body.classList.remove('rot');
+    placeFollowUI(false);
     showRotateTip(portrait);
   }
 }
@@ -1578,6 +1585,32 @@ function showRotateTip(on) {
     _rotTipDone = true;
     setTimeout(() => { el.style.display = 'none'; }, 600);
   }, 4200);
+}
+
+/* 画面顶部的小标签 / 居中提示：旋转时把它们也转到「画面坐标系」里 */
+function placeFollowUI(rot) {
+  const hint = document.getElementById('hint');
+  const title = document.getElementById('house-title');
+  if (!rot) {
+    if (hint) { hint.style.left = ''; hint.style.top = ''; hint.style.transform = ''; hint.style.whiteSpace = ''; }
+    if (title) { title.style.left = ''; title.style.top = ''; title.style.transform = ''; title.style.whiteSpace = ''; }
+    return;
+  }
+  const W = VIEW_W, iw = window.innerWidth, ih = window.innerHeight;
+  if (hint) {
+    /* 画面顶部居中 → 屏幕右边缘中部；旋转后 AABB 宽 ≈ 元素高 153，右缘留 8px */
+    hint.style.whiteSpace = 'nowrap';
+    hint.style.left = (iw - 18) + 'px';
+    hint.style.top = (ih / 2) + 'px';
+    hint.style.transform = 'translate(-50%,-50%) rotate(90deg)';
+  }
+  if (title) {
+    /* 画面左上角 → 屏幕右上方；AABB 宽 ≈ 130，右缘留 8px */
+    title.style.whiteSpace = 'nowrap';
+    title.style.left = (iw - 18) + 'px';
+    title.style.top = (ih / 2 + 8 - W / 2 + 18) + 'px';
+    title.style.transform = 'translate(-50%,-50%) rotate(90deg)';
+  }
 }
 
 /* 逻辑坐标 → 屏幕坐标（#act 这类 DOM 按钮定位用；旋转时要跟着转） */
