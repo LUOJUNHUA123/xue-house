@@ -12,6 +12,10 @@
 <style>
   * { margin:0; padding:0; box-sizing:border-box; }
 
+  /* 旋转模式（竖屏把画面转 90°）下，vw/vh 语义要交换：
+     视觉上的「宽」其实是 calc(100 * var(--vh))。下面所有弹窗尺寸都用 var(--vw/--vh)。 */
+  :root { --vw: 1vw; --vh: 1vh; }
+
   html, body {
     width:100%; height:100%;
     overflow:hidden;
@@ -94,6 +98,17 @@
   body.rot #act, body.rot #act2 { transform:translate(-50%,-50%) rotate(90deg); }
   body.rot #act:active, body.rot #act2:active { transform:translate(-50%,-50%) rotate(90deg) scale(.96); }
   body.rot { background:#0b0810; }
+  /* 旋转后视觉宽 = 100vh、视觉高 = 100vw，所以两个单位要交换 */
+  body.rot { --vw: 1vh; --vh: 1vw; }
+
+  /* 弹窗在旋转模式下也用旋转坐标系铺满，内部尺寸靠 var(--vw/--vh) 自动换算 */
+  body.rot #gift, body.rot #pwall, body.rot #dlg, body.rot #note {
+    inset: auto;
+    left: 50%; top: 50%;
+    width: 100vh; height: 100vw;
+    transform: translate(-50%, -50%) rotate(90deg);
+    transform-origin: center center;
+  }
 
   /* 旋转后 canvas 的 max-width/max-height 会把它压回竖屏宽度，JS 里已置 none */
 
@@ -118,8 +133,8 @@
 
   .g-card {
     position: relative;
-    width: min(84vw, 380px);
-    max-height: 92vh;
+    width: min(calc(84 * var(--vw)), 720px);
+    max-height: calc(92 * var(--vh));
     overflow-y: auto;
     -webkit-overflow-scrolling: touch;
     padding: 20px 22px 18px;
@@ -155,7 +170,7 @@
   }
 
   .g-frame {
-    width: min(100%, 30vh, 250px);
+    width: min(100%, calc(30 * var(--vh)), 250px);
     aspect-ratio: 1 / 1;
     margin: 0 auto;
     border-radius: 9px;
@@ -315,7 +330,7 @@
     .g-card { padding: 14px 18px 14px; border-radius: 12px; }
     .g-eyebrow { font-size: 9px; margin-bottom: 6px; letter-spacing: 2px; }
     .g-title { font-size: 17px; margin-bottom: 10px; }
-    .g-frame { width: min(100%, 34vh, 200px); }
+    .g-frame { width: min(100%, calc(34 * var(--vh)), 200px); }
     .g-desc { font-size: 12px; margin: 10px 2px 12px; }
     .g-next { padding: 7px 20px; font-size: 12px; }
   }
@@ -325,7 +340,7 @@
     position: fixed;
     left: 50%; top: 7.5%;
     transform: translateX(-50%) translateY(-6px) scale(.96);
-    max-width: 78vw;
+    max-width: calc(78 * var(--vw));
     padding: 7px 16px;
     border-radius: 9px;
     background: linear-gradient(180deg, #fffaf0, #f4e7d3);
@@ -389,16 +404,23 @@
 #dlg {
   position: fixed; inset: 0; z-index: 40;
   display: none; align-items: flex-end; justify-content: center;
-  padding: 0 14px 5.5vh;
+  padding: 0 14px calc(5.5 * var(--vh));
 }
 #dlg.show { display: flex; animation: dlgIn .28s ease both; }
 @keyframes dlgIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: none; } }
+
+  /* 旋转模式下 #dlg 容器自己也转了 90°，入场动画必须带上同样的变换，否则 to{transform:none} 会把旋转抹掉 */
+  @keyframes dlgInRot {
+    from { opacity: 0; transform: translate(-50%, -50%) rotate(90deg) translateY(10px); }
+    to   { opacity: 1; transform: translate(-50%, -50%) rotate(90deg); }
+  }
+  body.rot #dlg.show { animation: dlgInRot .28s ease both; }
 
 #dlg .d-veil { position: absolute; inset: 0; background: rgba(24, 14, 20, .28); }
 
 #dlg .d-box {
   position: relative;
-  width: min(92vw, 520px);
+  width: min(calc(92 * var(--vw)), 520px);
   display: flex; gap: 13px;
   padding: 14px 16px 13px;
   border-radius: 16px;
@@ -451,7 +473,7 @@
 #dlg .d-opt:active { transform: translateY(1px); box-shadow: 0 1px 0 #bfa986; }
 
 @media (max-height: 520px) {
-  #dlg { padding-bottom: 3vh; }
+  #dlg { padding-bottom: calc(3 * var(--vh)); }
   #dlg .d-box { padding: 11px 13px 10px; gap: 10px; }
   #dlg .d-ava { width: 46px; height: 46px; }
   #dlg .d-text { font-size: 13px; }
@@ -495,8 +517,8 @@
   }
   .pw-panel {
     position: relative;
-    width: min(94vw, 720px);
-    max-height: 92vh;
+    width: min(calc(94 * var(--vw)), 720px);
+    max-height: calc(92 * var(--vh));
     overflow-y: auto;
     -webkit-overflow-scrolling: touch;
     padding: 20px 22px 22px;
@@ -612,7 +634,7 @@
   }
   .pw-zoom.show { display: flex; }
   .pw-zoom .pz-img {
-    max-width: 92vw; max-height: 76vh;
+    max-width: calc(92 * var(--vw)); max-height: calc(76 * var(--vh));
     object-fit: contain;
     border-radius: 6px;
     box-shadow: 0 22px 60px rgba(0, 0, 0, 0.7);
@@ -622,7 +644,7 @@
     display: none;
     flex-direction: column; align-items: center; justify-content: center;
     gap: 10px;
-    width: min(92vw, 520px); aspect-ratio: 1 / 1;
+    width: min(calc(92 * var(--vw)), 520px); aspect-ratio: 1 / 1;
     border-radius: 6px; font-size: 14px; letter-spacing: 1.4px; color: #a8825f;
     background: repeating-linear-gradient(45deg, #f8f1e4 0 14px, #f0e5d2 14px 28px);
   }
@@ -659,11 +681,11 @@
   @keyframes ntIn { from { opacity: 0; } to { opacity: 1; } }
   #note .n-veil { position: absolute; inset: 0; background: rgba(24, 14, 20, .42); }
   #note .n-box {
-    position: relative; width: min(92vw, 470px); padding: 22px 26px 18px; border-radius: 16px;
+    position: relative; width: min(calc(92 * var(--vw)), 470px); padding: 22px 26px 18px; border-radius: 16px;
     background: linear-gradient(180deg, #fffdf8, #f7ebda);
     border: 1px solid rgba(198, 138, 100, .42);
     box-shadow: 0 20px 50px rgba(40, 20, 30, .35); text-align: center;
-    max-height: 88vh; overflow-y: auto;
+    max-height: calc(88 * var(--vh)); overflow-y: auto;
   }
   #note .n-tag { font-size: 10px; letter-spacing: 2.6px; color: #c4a082; margin-bottom: 9px; }
   #note .n-text { font-size: 14px; line-height: 1.95; color: #6b4a38; letter-spacing: .4px; white-space: pre-line; }
