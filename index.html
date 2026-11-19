@@ -43,35 +43,46 @@
     touch-action:none;
   }
 
-  /* 竖屏提示：请横屏 */
+  /* 竖屏提示：底部长条，不挡操作（竖着也能玩，只是画面转 90°） */
   #rotate {
-    position:fixed; inset:0;
-    background:#14101a;
+    position:fixed; left:0; right:0; bottom:0;
+    background:linear-gradient(180deg, rgba(20,16,26,0) 0%, rgba(20,16,26,0.90) 46%);
     display:none;
     align-items:center; justify-content:center;
     flex-direction:column;
-    gap:18px;
+    gap:3px;
     color:#f5e6d3;
-    z-index:99;
+    z-index:40;
     text-align:center;
-    padding:24px;
+    padding:26px 20px calc(14px + env(safe-area-inset-bottom, 0px));
+    pointer-events:none;
+    opacity:0;
+    transition:opacity .55s ease;
   }
+  #rotate.show { opacity:1; }
   #rotate .icon {
-    font-size:52px;
+    font-size:19px;
     animation:tilt 2s ease-in-out infinite;
   }
   @keyframes tilt {
     0%,100% { transform:rotate(0deg); }
     50%     { transform:rotate(90deg); }
   }
-  #rotate .t1 { font-size:17px; letter-spacing:1px; }
-  #rotate .t2 { font-size:12px; color:#a99bb5; }
+  #rotate .t1 { font-size:13px; letter-spacing:.6px; }
+  #rotate .t2 { font-size:11px; color:#a99bb5; }
 
-  /* 仅在「触屏 + 竖屏」时显示提示 */
+  /* 「触屏 + 竖屏」：不再藏游戏，由 JS 把画面整体旋转 90° 铺满（见 resize()）
+     这样即使手机开了「方向锁定」、微信里不跟随旋转，把手机横过来就能正常玩 */
   @media (orientation: portrait) and (hover: none) and (pointer: coarse) {
     #rotate { display:flex; }
-    #game  { display:none; }
   }
+
+  /* 画面被旋转时，浮在上面的互动按钮也跟着转，横向握持时文字才是正的 */
+  body.rot #act, body.rot #act2 { transform:translate(-50%,-50%) rotate(90deg); }
+  body.rot #act:active, body.rot #act2:active { transform:translate(-50%,-50%) rotate(90deg) scale(.96); }
+  body.rot { background:#0b0810; }
+
+  /* 旋转后 canvas 的 max-width/max-height 会把它压回竖屏宽度，JS 里已置 none */
 
   /* ================= 礼物卡片弹窗 ================= */
   #gift {
@@ -693,8 +704,8 @@
 
 <div id="rotate">
   <div class="icon">📱</div>
-  <div class="t1">请把手机横过来</div>
-  <div class="t2">横屏观看体验更好</div>
+  <div class="t1">把手机横过来，画面就是正的</div>
+  <div class="t2">竖着也能玩，只是画面转了 90°</div>
 </div>
 
 
