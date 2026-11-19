@@ -1507,11 +1507,20 @@ const IS_TOUCH = ('ontouchstart' in window) || (navigator.maxTouchPoints > 0) ||
 let VIEW_ROT = false;   /* 当前是否处于旋转铺满状态 */
 let VIEW_W = 0, VIEW_H = 0;  /* canvas 未旋转时的 CSS 像素尺寸 */
 
+/* 竖屏有两种看法：转 90° 铺满（横着拿手机最清楚，默认）/ 正立小画面（竖着直接看）
+   localStorage 记住选择，右下角 ⇄ 按钮随时切 */
+let FLAT_MODE = false;
+try { FLAT_MODE = localStorage.getItem('xc_flat') === '1'; } catch (e) {}
+
 function resize() {
   const vw = window.innerWidth, vh = window.innerHeight;
   const portrait = IS_TOUCH && vh > vw + 1;
+  const rot = portrait && !FLAT_MODE;
 
-  if (portrait) {
+  const tg = document.getElementById('rotoggle');
+  if (tg) tg.style.display = portrait ? 'flex' : 'none';
+
+  if (rot) {
     /* 旋转坐标系里可用区是 vh 宽 × vw 高 */
     const s = Math.min(vh / LOGIC_W, vw / LOGIC_H) * 0.99;
     VIEW_W = Math.round(LOGIC_W * s);
@@ -1543,7 +1552,7 @@ function resize() {
     VIEW.style.borderRadius = '';
     VIEW_ROT = false;
     document.body.classList.remove('rot');
-    showRotateTip(false);
+    showRotateTip(portrait);
   }
 }
 
@@ -1559,6 +1568,9 @@ function showRotateTip(on) {
     return;
   }
   if (_rotTipDone) return;
+  const t1 = el.querySelector('.t1'), t2 = el.querySelector('.t2');
+  if (t1) t1.textContent = FLAT_MODE ? '把手机横过来，画面更大更清楚' : '把手机横过来，画面就是正的';
+  if (t2) t2.textContent = FLAT_MODE ? '右下角 ⇄ 也能切换' : '右下角 ⇄ 可以换成竖着看的小画面';
   el.style.display = 'flex';
   requestAnimationFrame(() => el.classList.add('show'));
   showRotateTip._t = setTimeout(() => {
@@ -1580,6 +1592,20 @@ function logicToScreen(lx, ly) {
 }
 window.addEventListener('resize', resize);
 resize();
+
+/* 右下角 ⇄：横着看 / 竖着看 切换 */
+(function () {
+  const el = document.getElementById('rotoggle');
+  if (!el) return;
+  el.addEventListener('click', (e) => {
+    e.stopPropagation();
+    e.preventDefault();
+    FLAT_MODE = !FLAT_MODE;
+    try { localStorage.setItem('xc_flat', FLAT_MODE ? '1' : '0'); } catch (e2) {}
+    _rotTipDone = false;
+    resize();
+  });
+})();
 
 /* ---------- 主循环 ---------- */
 let last = performance.now();
