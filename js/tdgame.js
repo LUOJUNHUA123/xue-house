@@ -136,9 +136,9 @@ function updateAct() {
   if (state === 'wish') {
     if (el2) el2.classList.remove('show');
     if (!wishReady) { el.classList.remove('show'); return; }
-    const r = VIEW.getBoundingClientRect();
-    el.style.left = (r.left + r.width * 0.5) + 'px';
-    el.style.top = (r.top + r.height * 0.93) + 'px';
+    const pW = logicToScreen(240, 270 * 0.93);
+    el.style.left = pW.x + 'px';
+    el.style.top = pW.y + 'px';
     const sp = el.firstElementChild;
     if (sp && sp.textContent !== '吹蜡烛') sp.textContent = '吹蜡烛';
     el.classList.add('show');
@@ -150,9 +150,9 @@ function updateAct() {
     return;
   }
   const b = btnPos(NEAR);
-  const r = VIEW.getBoundingClientRect();
-  const px = r.left + (b.x / 480) * r.width;
-  const py = r.top + (b.y / 270) * r.height;
+  const bs = logicToScreen(b.x, b.y);
+  const px = bs.x;
+  const py = bs.y;
   el.style.left = px + 'px';
   el.style.top = py + 'px';
   const sp = el.firstElementChild;
@@ -237,6 +237,13 @@ function showToast(txt) {
 const TAP = { active: false, tx: 240, ty: 208, via: null, path: [], pi: 0 };
 
 function toLogic(clientX, clientY) {
+  if (VIEW_ROT) {
+    /* 画面顺时针转了 90°：屏幕上的 (dx,dy) 逆向映射回 canvas 本地坐标 */
+    const cx = window.innerWidth / 2, cy = window.innerHeight / 2;
+    const u = (clientY - cy) + VIEW_W / 2;
+    const v = -(clientX - cx) + VIEW_H / 2;
+    return { x: (u / VIEW_W) * LOGIC_W, y: (v / VIEW_H) * LOGIC_H };
+  }
   const r = VIEW.getBoundingClientRect();
   return {
     x: ((clientX - r.left) / r.width) * LOGIC_W,
@@ -1494,10 +1501,82 @@ function drawCelebrate(ctx, t) {
 }
 
 /* ---------- 缩放 ---------- */
+/* 触屏 + 竖屏时把画面整体旋转 90°：手机开了「方向锁定」、微信里不跟随旋转也能玩 */
+const IS_TOUCH = ('ontouchstart' in window) || (navigator.maxTouchPoints > 0) ||
+  !!(window.matchMedia && window.matchMedia('(hover: none) and (pointer: coarse)').matches);
+let VIEW_ROT = false;   /* 当前是否处于旋转铺满状态 */
+let VIEW_W = 0, VIEW_H = 0;  /* canvas 未旋转时的 CSS 像素尺寸 */
+
 function resize() {
-  const s = Math.min(window.innerWidth / LOGIC_W, window.innerHeight / LOGIC_H) * 0.97;
-  VIEW.style.width = Math.round(LOGIC_W * s) + 'px';
-  VIEW.style.height = Math.round(LOGIC_H * s) + 'px';
+  const vw = window.innerWidth, vh = window.innerHeight;
+  const portrait = IS_TOUCH && vh > vw + 1;
+
+  if (portrait) {
+    /* 旋转坐标系里可用区是 vh 宽 × vw 高 */
+    const s = Math.min(vh / LOGIC_W, vw / LOGIC_H) * 0.99;
+    VIEW_W = Math.round(LOGIC_W * s);
+    VIEW_H = Math.round(LOGIC_H * s);
+    VIEW.style.width = VIEW_W + 'px';
+    VIEW.style.height = VIEW_H + 'px';
+    VIEW.style.maxWidth = 'none';
+    VIEW.style.maxHeight = 'none';
+    VIEW.style.position = 'fixed';
+    VIEW.style.left = '50%';
+    VIEW.style.top = '50%';
+    VIEW.style.transform = 'translate(-50%,-50%) rotate(90deg)';
+    VIEW.style.borderRadius = '0';
+    VIEW_ROT = true;
+    document.body.classList.add('rot');
+    showRotateTip(true);
+  } else {
+    const s = Math.min(vw / LOGIC_W, vh / LOGIC_H) * 0.97;
+    VIEW_W = Math.round(LOGIC_W * s);
+    VIEW_H = Math.round(LOGIC_H * s);
+    VIEW.style.width = VIEW_W + 'px';
+    VIEW.style.height = VIEW_H + 'px';
+    VIEW.style.maxWidth = '';
+    VIEW.style.maxHeight = '';
+    VIEW.style.position = '';
+    VIEW.style.left = '';
+    VIEW.style.top = '';
+    VIEW.style.transform = '';
+    VIEW.style.borderRadius = '';
+    VIEW_ROT = false;
+    document.body.classList.remove('rot');
+    showRotateTip(false);
+  }
+}
+
+/* 竖屏时底部飘一条提示，4 秒后自己淡出，不挡点击 */
+let _rotTipDone = false;
+function showRotateTip(on) {
+  const el = document.getElementById('rotate');
+  if (!el) return;
+  clearTimeout(showRotateTip._t);
+  if (!on) {
+    el.classList.remove('show');
+    el.style.display = 'none';
+    return;
+  }
+  if (_rotTipDone) return;
+  el.style.display = 'flex';
+  requestAnimationFrame(() => el.classList.add('show'));
+  showRotateTip._t = setTimeout(() => {
+    el.classList.remove('show');
+    _rotTipDone = true;
+    setTimeout(() => { el.style.display = 'none'; }, 600);
+  }, 4200);
+}
+
+/* 逻辑坐标 → 屏幕坐标（#act 这类 DOM 按钮定位用；旋转时要跟着转） */
+function logicToScreen(lx, ly) {
+  const cx = window.innerWidth / 2, cy = window.innerHeight / 2;
+  const u = (lx / LOGIC_W) * VIEW_W, v = (ly / LOGIC_H) * VIEW_H;
+  if (VIEW_ROT) {
+    return { x: cx - (v - VIEW_H / 2), y: cy + (u - VIEW_W / 2) };
+  }
+  const r = VIEW.getBoundingClientRect();
+  return { x: r.left + u, y: r.top + v };
 }
 window.addEventListener('resize', resize);
 resize();
