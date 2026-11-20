@@ -132,6 +132,8 @@ const DIALOG = (() => {
     optsEl.classList.add('on');
   }
 
+  let shownAt = 0;
+
   function open(which) {
     if (!root) el();
     if (!root) return;
@@ -139,6 +141,7 @@ const DIALOG = (() => {
     cur = 'start';
     isOpen = true;
     root.classList.add('show');
+    shownAt = Date.now();
     pickCall();
     type(sub(nodes[cur].text));
   }
@@ -153,7 +156,12 @@ const DIALOG = (() => {
     el();
     if (!root) return;
     root.addEventListener('click', (e) => {
-      if (e.target === root || e.target.classList.contains('d-veil')) close();
+      if (e.target === root || e.target.classList.contains('d-veil')) {
+        /* 按钮是 pointerdown 打开的，touchend 之后浏览器还会补一个 click，
+           这个 click 正好落在刚出现的遮罩上 —— 320ms 内忽略，否则对话框闪一下就没了 */
+        if (Date.now() - shownAt < 320) return;
+        close();
+      }
       else if (e.target.classList.contains('d-text')) finish();
     });
     root.querySelector('.d-close').addEventListener('click', close);
