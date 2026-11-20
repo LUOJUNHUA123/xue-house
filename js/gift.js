@@ -97,6 +97,16 @@ const GIFT = (function () {
 
   let swapBusy = false, swapT = 0;
 
+  /* 记住看到第几份礼物：中途退出 / 熄屏 / 刷新，下次接着看 */
+  const KEY_GIFT = 'xc_gift';
+  let savedIdx = 0;
+  try { savedIdx = parseInt(localStorage.getItem(KEY_GIFT), 10) || 0; } catch (e) {}
+  function remember() {
+    if (list !== GIFTS) return;   /* 相册不走这份进度 */
+    savedIdx = idx;
+    try { localStorage.setItem(KEY_GIFT, String(idx)); } catch (e) {}
+  }
+
   /* 只换内容，不碰动画 */
   function render() {
     const g = list[idx];
@@ -106,6 +116,7 @@ const GIFT = (function () {
     stepEl.textContent = (idx + 1) + ' / ' + list.length;
     nextEl.textContent = idx >= list.length - 1 ? '回到小屋' : '下一份 ›';
     if (prevEl) prevEl.disabled = idx <= 0;
+    remember();
 
     phEl.style.display = 'none';
     imgEl.style.display = '';
@@ -146,7 +157,7 @@ const GIFT = (function () {
 
   function open(startIndex) {
     list = GIFTS;
-    openCommon(startIndex);
+    openCommon(startIndex == null ? savedIdx : startIndex);
   }
 
   function openPhoto(startIndex) {
@@ -170,7 +181,12 @@ const GIFT = (function () {
   function next() {
     if (swapBusy) return;
     if (typeof AU !== 'undefined') AU.page();
-    if (idx >= list.length - 1) { close(); return; }
+    if (idx >= list.length - 1) {
+      /* 全部看完了：下次打开从第一份重新开始 */
+      if (list === GIFTS) { idx = 0; remember(); }
+      close();
+      return;
+    }
     idx++;
     prime(idx);
     paint('next');
@@ -261,6 +277,13 @@ const PWALL = (function () {
 
   function closeZoom() { zoomEl.classList.remove('show'); }
 
+  /* 键盘翻页 / Esc 收起（点击以外的那条路） */
+  function nav(d) {
+    if (!zoomEl || !zoomEl.classList.contains('show')) return false;
+    zoom(idx + d);
+    return true;
+  }
+
   function open(startIndex) {
     if (!root) return;
     if (!gridEl.children.length) build();
@@ -296,7 +319,7 @@ const PWALL = (function () {
   }
 
   return {
-    init, open, close, closeZoom,
+    init, open, close, closeZoom, nav,
     isOpen: () => opened,
     isZoomed: () => !!(zoomEl && zoomEl.classList.contains('show')),
   };
@@ -333,7 +356,8 @@ const NOTE = (function () {
       const im = new Image();
       im.alt = '';
       im.style.objectFit = opt.fit || 'cover';
-      im.onerror = () => { picEl.innerHTML = ''; picEl.textContent = opt.ph || '照片待插入'; };
+      /* 图缺失时直接把相片区收起来：交付版里不出现「待插入」占位 */
+      im.onerror = () => { picEl.hidden = true; picEl.innerHTML = ''; };
       im.src = opt.img;
       picEl.appendChild(im);
     } else {
