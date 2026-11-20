@@ -14,7 +14,7 @@ const TD = { bg: null, ready: false, scene: 'cottage', fade: 0 };
 const SCENE_DEF = {
   /* ---------------- 室内 ---------------- */
   cottage: {
-    src: 'assets/scene_cottage.webp',
+    src: 'assets/scene_cottage.png',
     walk: { x0: 50, x1: 452, y0: 118, y1: 242 },
     cake: { x: 311, y: 152 },          // 桌上蛋糕顶面中心（画蜡烛用）
     table: { x: 262, y: 140, w: 98, h: 76 },
@@ -40,7 +40,7 @@ const SCENE_DEF = {
 
   /* ---------------- 沙滩 ---------------- */
   beach: {
-    src: 'assets/scene_beach.webp',
+    src: 'assets/scene_beach.png',
     walk: { x0: 14, x1: 466, y0: 118, y1: 266 },
     cake: null,
     rug: null,
@@ -489,6 +489,15 @@ function drawTopDownScene(ctx, t) {
     ctx.imageSmoothingEnabled = false;
   } else {
     P.r(ctx, 0, 0, LOGIC_W, LOGIC_H, '#caa079');
+    ctx.save();
+    ctx.fillStyle = 'rgba(92,58,44,0.8)';
+    ctx.font = '11px "PingFang SC","Microsoft YaHei",sans-serif';
+    ctx.textAlign = 'center';
+    ctx.fillText('场景图还在路上…', LOGIC_W / 2, 60);
+    ctx.font = '8px "PingFang SC","Microsoft YaHei",sans-serif';
+    ctx.fillStyle = 'rgba(92,58,44,0.55)';
+    ctx.fillText('网络好的话几秒就好', LOGIC_W / 2, 74);
+    ctx.restore();
   }
 
   if (TD.scene === 'cottage') {
