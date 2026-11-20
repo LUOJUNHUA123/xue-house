@@ -160,16 +160,27 @@ const GIFT = (function () {
     root.classList.remove('show');
   }
 
+  /* 提前把 src 换掉：离场那 0.2 秒里图片就开始加载/解码了 */
+  function prime(i) {
+    const g = list[i];
+    if (!g || !imgEl || !g.img) return;
+    if (imgEl.getAttribute('src') !== g.img) imgEl.src = g.img;
+  }
+
   function next() {
     if (swapBusy) return;
+    if (typeof AU !== 'undefined') AU.page();
     if (idx >= list.length - 1) { close(); return; }
     idx++;
+    prime(idx);
     paint('next');
   }
 
   function prev() {
     if (swapBusy || idx <= 0) return;
+    if (typeof AU !== 'undefined') AU.page();
     idx--;
+    prime(idx);
     paint('prev');
   }
 
@@ -358,3 +369,20 @@ if (document.readyState === 'loading') {
   PWALL.init();
   NOTE.init();
 }
+
+/* 预加载：礼物与相册的图提前灌进缓存并 decode，换页时不再"慢半拍" */
+(function preloadCards() {
+  const go = () => {
+    const all = [];
+    try { GIFTS.forEach((g) => g.img && all.push(g.img)); } catch (e) {}
+    try { PHOTOS.forEach((g) => g.img && all.push(g.img)); } catch (e) {}
+    all.forEach((src) => {
+      const im = new Image();
+      im.decoding = 'async';
+      im.src = src;
+      if (im.decode) im.decode().catch(() => {});
+    });
+  };
+  if (document.readyState === 'complete') setTimeout(go, 600);
+  else window.addEventListener('load', () => setTimeout(go, 600));
+})();
