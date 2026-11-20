@@ -19,6 +19,9 @@ let stateT = 0;
 let hintAlpha = 0;
 let nearCake = false;
 
+/* 系统开了「减少动态效果」：烟花 / 彩带 / 镜头推进都收着点 */
+const REDUCED_MOTION = !!(window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches);
+
 /* ---------- 角色 ---------- */
 const player = {
   x: 258, y: 222, dir: 'down',
@@ -109,8 +112,8 @@ function updateNear() {
   if (NEAR_LOCK) {
     const lock = INTERACTS.find((o) => o.id === NEAR_LOCK);
     if (lock && Math.hypot(player.x - lock.stand.x, player.y - lock.stand.y) < 42) {
-      NEAR = lock;
-      return;
+      /* 蛋糕要走到跟前才认：按钮提前出现会点空 */
+      if (lock.id !== 'cake' || nearCake) { NEAR = lock; return; }
     }
     /* 还没走到就先用「最近的」兜底，但锁保留 —— 由下一次点击决定换不换 */
   }
@@ -121,7 +124,7 @@ function updateNear() {
     const d = isHim
       ? Math.hypot(player.x - NPC.x, player.y - NPC.y)
       : Math.hypot(player.x - it.stand.x, player.y - it.stand.y);
-    const lim = isHim ? (NPC.linked ? 72 : 42) : 26;
+    const lim = isHim ? (NPC.linked ? 72 : 42) : (it.id === 'cake' ? 14 : 26);
     if (d < lim && d < bestD) { bestD = d; NEAR = it; }
   }
 }
@@ -177,6 +180,30 @@ function updateAct() {
     }
   }
 }
+/* 按下主互动键：键盘回车/空格走同一条路，别复制逻辑 */
+function pressAct() {
+  const el = _actEl();
+  /* 许愿特写里 NEAR 已被清空，这个按钮就是「吹蜡烛」 */
+  if (state === 'wish') {
+    if (!wishReady) return false;
+    if (el) el.classList.remove('show');
+    blowCandles();
+    return true;
+  }
+  if (!NEAR) return false;
+  const id = NEAR.id;
+  if (id === 'cake') {
+    checkNearCake();
+    if (!nearCake) return false;   /* 还在路上，等走到跟前再按 */
+  }
+  NEAR = null;
+  if (el) el.classList.remove('show');
+  const e2 = _act2El();
+  if (e2) e2.classList.remove('show');
+  runInteract(id);
+  return true;
+}
+
 function bindAct() {
   const el = _actEl();
   if (el && !el.dataset.bound) {
@@ -184,19 +211,7 @@ function bindAct() {
     el.addEventListener('pointerdown', (e) => {
       e.stopPropagation();
       e.preventDefault();
-      /* 许愿特写里 NEAR 已被清空，这个按钮就是「吹蜡烛」 */
-      if (state === 'wish') {
-        el.classList.remove('show');
-        blowCandles();
-        return;
-      }
-      if (!NEAR) return;
-      const id = NEAR.id;
-      NEAR = null;
-      el.classList.remove('show');
-      const e2 = _act2El();
-      if (e2) e2.classList.remove('show');
-      runInteract(id);
+      pressAct();
     });
   }
   const el2 = _act2El();
@@ -302,17 +317,7 @@ function onPointerDown(e) {
   }
 
   if (state === 'title') { startPlay(); return; }
-  if (state === 'celebrate' && stateT > 1.6) {
-    resetAll();
-    AU.startAmbience();
-    state = 'play';
-    stateT = 0;
-    npcSpawnAt(TD.scene);
-    buildNav();
-    bindAct();
-    if (typeof BGM !== 'undefined') BGM.play();
-    return;
-  }
+  if (state === 'celebrate' && stateT > 1.6) { leaveCelebrate(); return; }
   if (state !== 'play') return;
 
   /* 躺着/坐着时先站起来 */
@@ -346,6 +351,17 @@ function onPointerDown(e) {
     Math.max(WALK.y0, Math.min(WALK.y1, p.y)),
     null
   );
+}
+
+function leaveCelebrate() {
+  resetAll();
+  AU.startAmbience();
+  state = 'play';
+  stateT = 0;
+  npcSpawnAt(TD.scene);
+  buildNav();
+  bindAct();
+  if (typeof BGM !== 'undefined') BGM.play();
 }
 
 /* ---------- 网格寻路：避免直线穿过大桌子卡在桌角 ---------- */
@@ -665,7 +681,6 @@ const WISH_DUR = 15;
 
 /* 拆礼物盒动画（在 canvas 上播完再开卡片） */
 let giftAnim = null;   // { t, dur }
-let giftIdx = 0;       // 下一件要开的礼物
 
 const PET_LINE = '以后我们有自己的小家了就可以一起养你喜欢的狗狗和猫猫了呀OvO ♥';          /* 许愿特写持续 15 秒，之后才出现「吹蜡烛」 */
 let wishReady = false;
@@ -673,6 +688,7 @@ let wishReady = false;
 let confetti = [];
 let fwTimer = 0;
 function spawnConfetti(n) {
+  if (REDUCED_MOTION) n = Math.max(8, Math.round(n * 0.3));
   const cols = ['#ffd9e2', '#fff3d0', '#ffb3c6', '#c9d8ff', '#ffe9a8', '#e3d0f2'];
   for (let i = 0; i < n; i++) {
     confetti.push({
@@ -833,7 +849,7 @@ function update(dt) {
     return;
   }
   if (state === 'celebrate') {
-    if (Math.random() < dt * 2.2) spawnConfetti(5);
+    if (!REDUCED_MOTION && Math.random() < dt * 2.2) spawnConfetti(5);
     /* 稀疏的礼花噼啪，别盖住生日歌 */
     fwTimer -= dt;
     if (fwTimer <= 0 && stateT < 12) {
@@ -876,7 +892,6 @@ function update(dt) {
   hintAlpha += ((nearCake ? 1 : 0) - hintAlpha) * Math.min(1, dt * 12);
   updateNear();
   updateAct();
-  _dbg();
 }
 
 /* ---------- 靠近时浮出的互动按钮 ---------- */
@@ -913,8 +928,43 @@ function drawPlayerSprite(ctx, t) {
   else drawHeroSprite(ctx, player.x, player.y, player.dir, player.moving, player.animT);
 }
 
+/* 底图/精灵还没到位时先画这一屏（不是黑屏，有字、有暖光、会呼吸） */
+function drawLoading() {
+  const w = VIEW.width, h = VIEW.height, t = time;
+  vctx.setTransform(1, 0, 0, 1, 0, 0);
+  vctx.clearRect(0, 0, w, h);
+  vctx.fillStyle = '#14101a';
+  vctx.fillRect(0, 0, w, h);
+
+  const g = vctx.createRadialGradient(w / 2, h / 2, 8, w / 2, h / 2, Math.max(w, h) * 0.55);
+  g.addColorStop(0, 'rgba(255,206,186,0.13)');
+  g.addColorStop(1, 'rgba(255,206,186,0)');
+  vctx.fillStyle = g;
+  vctx.fillRect(0, 0, w, h);
+
+  const dots = '.'.repeat(1 + (Math.floor(t * 1.7) % 3));
+  vctx.textAlign = 'center';
+  vctx.textBaseline = 'middle';
+  vctx.fillStyle = 'rgba(255,242,234,0.88)';
+  vctx.font = '12px "PingFang SC","Microsoft YaHei",sans-serif';
+  vctx.fillText('正在打开小屋' + dots, w / 2, h / 2 - 6);
+
+  vctx.fillStyle = 'rgba(255,242,234,0.44)';
+  vctx.font = '8px "PingFang SC","Microsoft YaHei",sans-serif';
+  vctx.fillText(t > 14 ? '网络有点慢，再等一下下' : '第一次打开会慢几秒', w / 2, h / 2 + 12);
+
+  /* 一圈很轻的呼吸环，让「还没死」这件事肉眼可见 */
+  const r = 3 + Math.sin(t * 2.2) * 1.1;
+  vctx.beginPath();
+  vctx.arc(w / 2, h / 2 + 30, r, 0, Math.PI * 2);
+  vctx.fillStyle = 'rgba(255,214,196,0.55)';
+  vctx.fill();
+}
+
 function render() {
   const t = time;
+
+  if (!(TD.ready && HERO_SPR.ready)) { drawLoading(); return; }
 
   drawTopDownScene(bctx, t);
   if (TD.scene === 'cottage') { drawLetter(bctx, t); drawCakeAge(bctx, t); }
@@ -1137,7 +1187,7 @@ function drawTitle(ctx, t) {
   for (let i = 0; i < 48; i++) {
     const x = (i * 137.5) % LOGIC_W;
     const y = (i * 71.3) % LOGIC_H;
-    ctx.globalAlpha = 0.16 + 0.55 * Math.abs(Math.sin(t * 1.3 + i));
+    ctx.globalAlpha = REDUCED_MOTION ? 0.42 : 0.16 + 0.55 * Math.abs(Math.sin(t * 1.3 + i));
     P.r(ctx, x, y, 1, 1, '#fff4d8');
   }
   ctx.globalAlpha = 1;
@@ -1197,9 +1247,8 @@ function updateGiftAnim(dt) {
   giftAnim.t += dt;
   if (giftAnim.t < giftAnim.dur) return;
   giftAnim = null;
-  const n = (typeof GIFTS !== 'undefined') ? GIFTS.length : 1;
-  if (typeof GIFT !== 'undefined') GIFT.open(giftIdx % Math.max(1, n));
-  giftIdx = (giftIdx + 1) % Math.max(1, n);
+  /* 接着上次看到的那一份继续；第一次打开从第一份开始 */
+  if (typeof GIFT !== 'undefined') GIFT.open();
 }
 
 /* ---------- 书桌上那封信 ---------- */
@@ -1349,7 +1398,7 @@ function wishShot(ctx, t) {
   sc.clearRect(0, 0, LOGIC_W, LOGIC_H);
   sc.drawImage(BUF.canvas, 0, 0);
 
-  const k = Math.min(1, stateT / 7);
+  const k = Math.min(1, stateT / (REDUCED_MOTION ? 0.8 : 7));
   const z = 1.60 + k * 0.64;
   const cx = (player.x + 311) / 2;
   const cy = (player.y + 152) / 2 - 4;
@@ -1648,12 +1697,82 @@ function loop(now) {
   last = now;
   steerToTarget();
   update(dt);
+  _dbg();
   render();
   requestAnimationFrame(loop);
 }
 
+/* ---------- 键盘：桌面端也能从头玩到尾 ---------- */
+document.addEventListener('keydown', (e) => {
+  if (e.ctrlKey || e.metaKey || e.altKey) return;
+  const k = e.key;
+
+  /* 弹窗从最上层往下处理 */
+  if (typeof NOTE !== 'undefined' && NOTE.isOpen()) {
+    if (k === 'Escape' || k === 'Enter' || k === ' ') { e.preventDefault(); NOTE.close(); }
+    return;
+  }
+  if (typeof DIALOG !== 'undefined' && DIALOG.isOpen()) {
+    if (k === 'Escape') { e.preventDefault(); DIALOG.close(); }
+    return;
+  }
+  if (typeof GIFT !== 'undefined' && GIFT.isOpen()) {
+    if (k === 'ArrowLeft') { e.preventDefault(); GIFT.prev(); }
+    else if (k === 'ArrowRight' || k === ' ' || k === 'Enter') { e.preventDefault(); GIFT.next(); }
+    else if (k === 'Escape') { e.preventDefault(); GIFT.close(); }
+    return;
+  }
+  if (typeof PWALL !== 'undefined' && PWALL.isOpen()) {
+    if (PWALL.isZoomed()) {
+      if (k === 'ArrowLeft') { e.preventDefault(); PWALL.nav(-1); }
+      else if (k === 'ArrowRight') { e.preventDefault(); PWALL.nav(1); }
+      else if (k === 'Escape' || k === 'Enter') { e.preventDefault(); PWALL.closeZoom(); }
+    } else if (k === 'Escape') { e.preventDefault(); PWALL.close(); }
+    return;
+  }
+
+  /* 画面里：M 音乐开关 / N 切歌 / 空格·回车 = 当前互动键 */
+  if (k === 'm' || k === 'M') {
+    if (typeof BGM !== 'undefined' && BGM.toggle) {
+      if (AU.isMuted()) AU.setMuted(false);
+      BGM.toggle();
+      musicPop = 1;
+    }
+    return;
+  }
+  if (k === 'n' || k === 'N') {
+    if (typeof BGM !== 'undefined' && BGM.next) { BGM.next(); nextPop = 1; }
+    return;
+  }
+  if (k === ' ' || k === 'Enter') {
+    if (state === 'title') { e.preventDefault(); startPlay(); return; }
+    if (state === 'celebrate' && stateT > 1.6) { e.preventDefault(); leaveCelebrate(); return; }
+    if (state === 'play' || state === 'wish') { e.preventDefault(); pressAct(); }
+  }
+});
+
+/* iOS / 微信兜底：任意一次手势里再把音频解锁一次，第一次点击不至于白费 */
+(function audioWarmup() {
+  let done = false;
+  const go = () => {
+    if (done) return;
+    done = true;
+    try { if (typeof AU !== 'undefined' && AU.unlock) AU.unlock(); } catch (e) {}
+    try { if (typeof BGM !== 'undefined' && BGM.resume) BGM.resume(); } catch (e) {}
+    window.removeEventListener('pointerdown', go, true);
+    window.removeEventListener('touchstart', go, true);
+    window.removeEventListener('keydown', go, true);
+  };
+  window.addEventListener('pointerdown', go, true);
+  window.addEventListener('touchstart', go, true);
+  window.addEventListener('keydown', go, true);
+})();
+
 initIntro();
 
-loadHeroSprite(() => {
-  loadRoomBg(() => requestAnimationFrame(loop));
-});
+/* 循环先跑起来：底图和精灵还在路上时画加载页，图到了自动接上。
+   以前是「两张全 onload 了才 requestAnimationFrame(loop)」，
+   手机弱网下音乐把带宽抢光，场景图几十秒才到，这期间画布是全透明的——就是黑屏。 */
+requestAnimationFrame(loop);
+loadHeroSprite(() => {});
+loadRoomBg(() => {});
