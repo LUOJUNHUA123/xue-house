@@ -181,6 +181,112 @@ const AU = (function () {
     bell(91, ac.currentTime, 0.16, 0.03, sfxBus);
   }
 
+  /* 翻页：纸张擦过（带通噪声快速上扫） */
+  function page() {
+    if (!ensure() || muted) return;
+    const t = ac.currentTime;
+    const src = noise(0.24);
+    const bp = ac.createBiquadFilter();
+    bp.type = 'bandpass';
+    bp.frequency.setValueAtTime(850, t);
+    bp.frequency.exponentialRampToValueAtTime(2700, t + 0.10);
+    bp.Q.value = 0.9;
+    const g = ac.createGain();
+    g.gain.setValueAtTime(0.0001, t);
+    g.gain.exponentialRampToValueAtTime(0.17, t + 0.012);
+    g.gain.exponentialRampToValueAtTime(0.0001, t + 0.19);
+    src.connect(bp); bp.connect(g); g.connect(sfxBus);
+    src.start(t); src.stop(t + 0.24);
+  }
+
+  /* 拆信：先纸面摩擦，再"啵"一下撕开封蜡 */
+  function envelope() {
+    if (!ensure() || muted) return;
+    const t = ac.currentTime;
+    const s1 = noise(0.32);
+    const hp = ac.createBiquadFilter();
+    hp.type = 'highpass'; hp.frequency.value = 1100;
+    const g1 = ac.createGain();
+    g1.gain.setValueAtTime(0.0001, t);
+    g1.gain.linearRampToValueAtTime(0.10, t + 0.035);
+    g1.gain.exponentialRampToValueAtTime(0.0001, t + 0.27);
+    s1.connect(hp); hp.connect(g1); g1.connect(sfxBus);
+    s1.start(t); s1.stop(t + 0.32);
+
+    const s2 = noise(0.18);
+    const bp = ac.createBiquadFilter();
+    bp.type = 'bandpass'; bp.frequency.value = 2900; bp.Q.value = 1.5;
+    const g2 = ac.createGain();
+    g2.gain.setValueAtTime(0.0001, t + 0.09);
+    g2.gain.linearRampToValueAtTime(0.12, t + 0.12);
+    g2.gain.exponentialRampToValueAtTime(0.0001, t + 0.26);
+    s2.connect(bp); bp.connect(g2); g2.connect(sfxBus);
+    s2.start(t + 0.09); s2.stop(t + 0.27);
+
+    bell(72, t + 0.16, 0.22, 0.05, sfxBus);
+  }
+
+  /* ---------- 海浪（室外循环） ---------- */
+  let seaOn = false, seaNodes = [];
+
+  function startSea() {
+    if (!ensure() || seaOn || muted) return;
+    seaOn = true;
+    const t = ac.currentTime;
+
+    const src = noise(4);
+    src.loop = true;
+
+    const hp = ac.createBiquadFilter();
+    hp.type = 'highpass'; hp.frequency.value = 85;
+    const lp = ac.createBiquadFilter();
+    lp.type = 'lowpass';
+    lp.frequency.value = 900;
+    lp.Q.value = 0.5;
+
+    const g = ac.createGain();
+    g.gain.setValueAtTime(0.0001, t);
+    g.gain.linearRampToValueAtTime(0.085, t + 2.6);
+
+    /* 慢速潮汐：0.13Hz 的正弦叠在音量上，像一波一波推上来 */
+    const lfo = ac.createOscillator();
+    lfo.type = 'sine'; lfo.frequency.value = 0.13;
+    const lfoG = ac.createGain();
+    lfoG.gain.value = 0.05;
+    lfo.connect(lfoG); lfoG.connect(g.gain);
+
+    /* 再叠一层稍快的呼吸，避免听起来像死循环 */
+    const lfo2 = ac.createOscillator();
+    lfo2.type = 'sine'; lfo2.frequency.value = 0.037;
+    const lfo2G = ac.createGain();
+    lfo2G.gain.value = 0.02;
+    lfo2.connect(lfo2G); lfo2G.connect(g.gain);
+
+    src.connect(hp); hp.connect(lp); lp.connect(g); g.connect(musicBus);
+    src.start(t); lfo.start(t); lfo2.start(t);
+    seaNodes = [src, hp, lp, g, lfo, lfoG, lfo2, lfo2G];
+  }
+
+  function stopSea() {
+    if (!seaOn) return;
+    seaOn = false;
+    if (!ready || !ac) { seaNodes = []; return; }
+    const t = ac.currentTime;
+    const g = seaNodes[3];
+    if (g && g.gain) {
+      try {
+        g.gain.cancelScheduledValues(t);
+        g.gain.setValueAtTime(g.gain.value, t);
+        g.gain.linearRampToValueAtTime(0.0001, t + 1.4);
+      } catch (e) {}
+    }
+    const olds = seaNodes.slice();
+    seaNodes = [];
+    setTimeout(() => {
+      olds.forEach((n) => { try { if (n.stop) n.stop(); if (n.disconnect) n.disconnect(); } catch (e) {} });
+    }, 1700);
+  }
+
   /* ---------- 生日歌（八音盒） ---------- */
 
   /* [midi, 拍数] ，1 拍 = beat 秒 */
@@ -324,6 +430,7 @@ const AU = (function () {
 
   return {
     unlock, spark, blow, firework, chimeUp, tap, voice, lastVoice: () => LAST_VOICE,
+    page, envelope, startSea, stopSea,
     playSong, startAmbience, stopAmbience,
     setMuted, toggleMute, isMuted,
   };
