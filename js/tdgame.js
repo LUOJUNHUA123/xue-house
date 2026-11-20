@@ -565,7 +565,7 @@ function runInteract(id) {
     return;
   }
   if (id === 'letter') {
-    AU.chimeUp();
+    AU.envelope();
     const body = '雪雪：\n\n生日快乐呀。\n\n你说最有印象的花是勿忘我，我记住了。窗边那束就是——看见它的时候，也顺便想起我一下。\n\n以后每年的这一天，我都想坐在你旁边，看你把蜡烛一根一根吹灭。\n\n—— 一直站在你旁边的人';
     if (typeof NOTE !== 'undefined') {
       NOTE.show({
@@ -613,6 +613,7 @@ function goScene(id, spawn) {
     TAP.path = [];
     npcSpawnAt(id);
     buildNav();
+    if (typeof AU !== 'undefined') { if (id === 'beach') AU.startSea(); else AU.stopSea(); }
     if (id === 'beach') setTimeout(() => { if (state === 'play') showToast('外面就是海。傍晚的风很软。'); }, 700);
   });
 }
