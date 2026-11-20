@@ -44,11 +44,20 @@ const WALK_FRONT = [
 let _heroPending = 7;
 
 function loadHeroSprite(cb) {
-  function done() {
-    if (--_heroPending > 0) return;
+  let fired = false;
+  function fire() {
+    if (fired) return;
+    fired = true;
     HERO_SPR.ready = true;
     if (cb) cb();
   }
+  function done() {
+    if (--_heroPending > 0) return;
+    fire();
+  }
+  /* 兜底：手机弱网下 7 张 sheet 里总有一两张挂住，不能因此永远停在加载页。
+     9 秒还没齐就先放行，缺的帧由 drawHeroSprite 自己跳过。 */
+  setTimeout(fire, 9000);
   function load(src, n, key) {
     const img = new Image();
     img.onload = () => {
