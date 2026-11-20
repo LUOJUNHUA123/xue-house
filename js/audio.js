@@ -453,6 +453,9 @@ const BGM = (function () {
   let userOff = false;   // 玩家用唱片按钮手动关掉了音乐
 
   function tryPlay() {
+    /* preload='none' 时 iOS / 微信有时不会自己开始加载，play() 直接 reject。
+       先手动 load 一次再播，避免「点开了但没声音」。 */
+    try { if (el.readyState === 0) el.load(); } catch (e) {}
     const p = el.play();
     if (p && p.catch) p.catch(() => {});
   }
