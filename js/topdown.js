@@ -1,7 +1,7 @@
 /* ============================================================
  *  topdown.js — 双场景：海边小屋（室内）/ 傍晚沙滩
  *
- *  底图：assets/scene_cottage.png / scene_beach.png（均 960x540，
+ *  底图：assets/scene_cottage.webp / scene_beach.webp（均 960x540，
  *        1536x864 生成图等比缩小 0.625），绘制到 480x270 逻辑画布时
  *        临时开 imageSmoothing，保留柔和像素颗粒。
  *
@@ -14,7 +14,7 @@ const TD = { bg: null, ready: false, scene: 'cottage', fade: 0 };
 const SCENE_DEF = {
   /* ---------------- 室内 ---------------- */
   cottage: {
-    src: 'assets/scene_cottage.png',
+    src: 'assets/scene_cottage.webp',
     walk: { x0: 50, x1: 452, y0: 118, y1: 242 },
     cake: { x: 311, y: 152 },          // 桌上蛋糕顶面中心（画蜡烛用）
     table: { x: 262, y: 140, w: 98, h: 76 },
@@ -40,7 +40,7 @@ const SCENE_DEF = {
 
   /* ---------------- 沙滩 ---------------- */
   beach: {
-    src: 'assets/scene_beach.png',
+    src: 'assets/scene_beach.webp',
     walk: { x0: 14, x1: 466, y0: 118, y1: 266 },
     cake: null,
     rug: null,
