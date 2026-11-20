@@ -416,6 +416,16 @@
   }
   body.rot #dlg.show { animation: dlgInRot .28s ease both; }
 
+  /* 开始按钮 / 顶部小提示：旋转模式下跟着画面一起转 */
+  body.rot #start { transform: translate(-50%, -50%) rotate(90deg); }
+  body.rot #start:hover { transform: translate(-50%, -50%) rotate(90deg) scale(1.05); }
+  body.rot #toast {
+    left: auto; right: 44px; top: 50%;
+    transform-origin: right center;
+  }
+  body.rot #toast,
+  body.rot #toast.show { transform: rotate(90deg); }
+
 #dlg .d-veil { position: absolute; inset: 0; background: rgba(24, 14, 20, .28); }
 
 #dlg .d-box {
