@@ -111,18 +111,24 @@ function loadRoomBg(cb) {
   const keys = Object.keys(SCENE_DEF);
   const imgs = {};
   let n = 0;
+  let fired = false;
+  const fire = () => {
+    if (fired) return;
+    fired = true;
+    TD.imgs = imgs;
+    TD.bg = imgs[TD.scene] || null;
+    TD.ready = true;
+    cb && cb();
+  };
+  /* 兜底：底图挂住时也别让开局停在加载页 */
+  setTimeout(fire, 9000);
   keys.forEach((k) => {
     const img = new Image();
     img.onload = () => {
       imgs[k] = img;
-      if (++n === keys.length) {
-        TD.imgs = imgs;
-        TD.bg = imgs[TD.scene];
-        TD.ready = true;
-        cb && cb();
-      }
+      if (++n === keys.length) fire();
     };
-    img.onerror = () => { if (++n === keys.length) { TD.imgs = imgs; cb && cb(); } };
+    img.onerror = () => { if (++n === keys.length) fire(); };
     img.src = SCENE_DEF[k].src;
   });
 }
