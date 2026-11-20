@@ -736,16 +736,23 @@
   #start.lit { opacity: 1; }
   #start:hover { transform: translate(-50%, -50%) scale(1.05); }
   #start.gone { opacity: 0; pointer-events: none; }
+
+  /* ---------- 系统开了「减少动态效果」：只留必要的淡入 ---------- */
+  @media (prefers-reduced-motion: reduce) {
+    #rotate .icon { animation: none; }
+    .g-card, .pw-panel, #dlg.show, #note.show { animation: none !important; }
+    #start, #toast, #hint, #act, #act2, #house-title { transition-duration: .01ms !important; }
+  }
 </style>
 </head>
 <body>
 
-<canvas id="game" width="480" height="270"></canvas>
+<canvas id="game" width="480" height="270" role="application" aria-label="生日小屋游戏画面：点画面里的东西走近它，再用按钮互动"></canvas>
 <div id="hint">轻点蛋糕 ⟶ 吹蜡烛</div>
-<div id="toast"></div>
+<div id="toast" role="status" aria-live="polite"></div>
 <div id="house-title">何丽雪的生日小屋</div>
-<div id="act"><span></span></div>
-<div id="act2"><span></span></div>
+<div id="act" role="button" tabindex="-1"><span></span></div>
+<div id="act2" role="button" tabindex="-1"><span></span></div>
 
 <button id="rotoggle" aria-label="切换横竖屏">⇄</button>
 <div id="rotate">
@@ -755,7 +762,7 @@
 </div>
 
 
-<div id="dlg">
+<div id="dlg" role="dialog" aria-modal="true" aria-label="和他说说话">
   <div class="d-veil"></div>
   <div class="d-box">
     <button class="d-close" aria-label="关闭">×</button>
@@ -768,7 +775,7 @@
   </div>
 </div>
 
-<div id="gift">
+<div id="gift" role="dialog" aria-modal="true" aria-label="生日礼物">
   <div class="g-veil"></div>
   <div class="g-card">
     <button class="g-close" aria-label="关闭">×</button>
@@ -788,7 +795,7 @@
   </div>
 </div>
 
-<div id="pwall">
+<div id="pwall" role="dialog" aria-modal="true" aria-label="我们的相册">
   <div class="pw-veil"></div>
   <div class="pw-panel">
     <button class="pw-close" aria-label="关闭">×</button>
@@ -813,7 +820,7 @@
   </div>
 </div>
 
-<div id="note">
+<div id="note" role="dialog" aria-modal="true" aria-label="便签">
   <div class="n-veil"></div>
   <div class="n-box">
     <div class="n-tag">A LITTLE NOTE</div>
