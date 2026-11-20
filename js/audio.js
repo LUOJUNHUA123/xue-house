@@ -441,9 +441,12 @@ const BGM = (function () {
   const TRACKS = ['assets/music/bg99.mp3', 'assets/music/song100.mp3'];
   const TRACK_NAMES = ['99', '100'];
   let ti = 0;
-  const el = new Audio(TRACKS[0]);
+  const el = new Audio();
   el.loop = true;
-  el.preload = 'auto';
+  /* 关键：不要 'auto'。手机上 4.5MB 的音乐会把场景底图（804KB）的带宽全抢走，
+     首屏几十秒都是黑的。改成 'none'，等玩家点开始、真的 play() 时再下载。 */
+  el.preload = 'none';
+  el.src = TRACKS[0];
   el.volume = 0.42;
   let want = false;
   let vol = 0.42;
