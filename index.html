@@ -363,6 +363,51 @@
   @media (max-height: 520px) { #toast { font-size: 12px; padding: 5px 12px; } }
 
   /* ================= 左上角小屋名 ================= */
+  /* ---------- 开场动画 ---------- */
+  #opening {
+    position: fixed; inset: 0; z-index: 300;
+    display: flex; align-items: center; justify-content: center;
+    background: radial-gradient(125% 95% at 50% 38%, #5c3549 0%, #3a2033 55%, #241328 100%);
+    overflow: hidden; cursor: pointer;
+    transition: opacity .78s ease;
+  }
+  #opening.out { opacity: 0; }
+  #openingFx { position: absolute; inset: 0; width: 100%; height: 100%; display: block; }
+  #opening .i-wrap {
+    position: relative; z-index: 2;
+    display: flex; flex-direction: column; gap: 2.8vh;
+    text-align: center; padding: 0 7vw;
+  }
+  /* 文字后面的柔光暗底：爱心飘过去也不会把字吃掉 */
+  #opening .i-wrap::before {
+    content: ''; position: absolute; left: 50%; top: 50%;
+    width: 132%; height: 320%; transform: translate(-50%, -50%); z-index: -1;
+    background: radial-gradient(54% 52% at 50% 50%,
+      rgba(30,15,28,.56) 0%, rgba(30,15,28,.28) 46%, rgba(30,15,28,0) 70%);
+    pointer-events: none;
+  }
+  #opening .i-txt {
+    opacity: 0; transform: translateY(14px) scale(.97); filter: blur(3px);
+    transition: opacity .95s ease, transform 1.15s cubic-bezier(.18,.9,.3,1.08), filter 1s ease;
+  }
+  #opening .i-txt.on { opacity: 1; transform: none; filter: none; }
+  #opening .t1 {
+    font-size: clamp(23px, 4.6vw, 40px); font-weight: 800; letter-spacing: .09em;
+    color: #fff6ec;
+    text-shadow: 0 2px 0 rgba(110,44,66,.72), 0 0 28px rgba(255,160,196,.55);
+  }
+  #opening .t2 {
+    font-size: clamp(13px, 2.3vw, 20px); letter-spacing: .05em; color: #ffe3ee;
+    text-shadow: 0 1px 0 rgba(110,44,66,.55), 0 0 16px rgba(255,170,200,.4);
+  }
+  #opening .i-skip {
+    position: absolute; left: 50%; bottom: 4.2vh; transform: translateX(-50%);
+    z-index: 3; font-size: 11px; letter-spacing: .24em;
+    padding: 5px 14px; border-radius: 999px;
+    background: rgba(36,19,40,.5);
+    color: rgba(255,230,240,.72);
+  }
+
   #house-title {
     position: fixed;
     left: 2%; top: 2.2%;
@@ -741,11 +786,21 @@
   @media (prefers-reduced-motion: reduce) {
     #rotate .icon { animation: none; }
     .g-card, .pw-panel, #dlg.show, #note.show { animation: none !important; }
-    #start, #toast, #hint, #act, #act2, #house-title { transition-duration: .01ms !important; }
+    #start, #toast, #hint, #act, #act2, #house-title,
+    #opening, #opening .i-txt { transition-duration: .01ms !important; }
   }
 </style>
 </head>
 <body>
+
+<div id="opening">
+  <canvas id="openingFx" width="480" height="270" aria-hidden="true"></canvas>
+  <div class="i-wrap">
+    <div class="i-txt t1">雪雪生日快乐呀！</div>
+    <div class="i-txt t2">这是我为你做的专属生日小屋，好好参观吧ovo</div>
+  </div>
+  <div class="i-skip">轻点一下继续</div>
+</div>
 
 <canvas id="game" width="480" height="270" role="application" aria-label="生日小屋游戏画面：点画面里的东西走近它，再用按钮互动"></canvas>
 <div id="hint">轻点蛋糕 ⟶ 吹蜡烛</div>
@@ -839,6 +894,7 @@
 <script src="js/hero.js"></script>
 <script src="js/gift.js"></script>
 <script src="js/dialog.js"></script>
+<script src="js/intro.js"></script>
 <script src="js/tdgame.js"></script>
 </body>
 </html>
