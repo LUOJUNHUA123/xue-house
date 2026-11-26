@@ -132,6 +132,11 @@ function updateNear() {
 const _actEl = () => document.getElementById('act');
 function _act2El() { return document.getElementById('act2'); }
 
+/* 互动按钮的家：固定在画面底部中央，不跟着物件跑。
+   以前每个物件自带 btn:{x,y}，走近谁按钮就跳到谁头上，一屋子东西显得很乱。 */
+const ACT_HOME = { x: 240, y: 247 };
+const ACT2_HOME = { x: 240, y: 215 };
+
 function updateAct() {
   const el = _actEl();
   const el2 = _act2El();
@@ -139,7 +144,7 @@ function updateAct() {
   if (state === 'wish') {
     if (el2) el2.classList.remove('show');
     if (!wishReady) { el.classList.remove('show'); return; }
-    const pW = logicToScreen(240, 270 * 0.93);
+    const pW = logicToScreen(ACT_HOME.x, ACT_HOME.y);
     el.style.left = pW.x + 'px';
     el.style.top = pW.y + 'px';
     const sp = el.firstElementChild;
@@ -152,8 +157,7 @@ function updateAct() {
     if (el2) el2.classList.remove('show');
     return;
   }
-  const b = btnPos(NEAR);
-  const bs = logicToScreen(b.x, b.y);
+  const bs = logicToScreen(ACT_HOME.x, ACT_HOME.y);
   const px = bs.x;
   const py = bs.y;
   el.style.left = px + 'px';
@@ -165,13 +169,9 @@ function updateAct() {
   /* 他在旁边时多给一个「说说话」，牵手和聊天不打架 */
   if (el2) {
     if (NEAR.id === 'him' && TD.scene !== 'beach') {
-      if (VIEW_ROT) {
-        el2.style.left = (px - 36) + 'px';
-        el2.style.top = py + 'px';
-      } else {
-        el2.style.left = px + 'px';
-        el2.style.top = (py + 32) + 'px';
-      }
+      const b2 = logicToScreen(ACT2_HOME.x, ACT2_HOME.y);
+      el2.style.left = b2.x + 'px';
+      el2.style.top = b2.y + 'px';
       const sp2 = el2.firstElementChild;
       if (sp2 && sp2.textContent !== '说说话') sp2.textContent = '说说话';
       el2.classList.add('show');
