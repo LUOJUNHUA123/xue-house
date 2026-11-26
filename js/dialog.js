@@ -3,6 +3,8 @@
 const DIALOG = (() => {
   /* 女主对他的称呼：每换一句台词重新抽一次 */
   const CALLS = ['你', '哥哥', '老公', '宝宝'];
+  /* 他嘴里的她只有一个叫法，不参与随机 */
+  const HER = '雪雪';
 
   const SETS = {
     cottage: {
@@ -68,9 +70,10 @@ const DIALOG = (() => {
     call = CALLS[Math.floor(Math.random() * CALLS.length)];
   }
 
-  /* 把 {c} 换成这一句抽到的称呼 */
-  function sub(str) {
-    return String(str).replace(/\{c\}/g, call);
+  /* {c} = 对「对方」的称呼。
+     他说出口的永远是「雪雪」；只有她自己开口（选项按钮）才用随机称呼。 */
+  function sub(str, byHim) {
+    return String(str).replace(/\{c\}/g, byHim ? HER : call);
   }
 
   function el() {
@@ -115,14 +118,14 @@ const DIALOG = (() => {
     node.opts.forEach((o) => {
       const b = document.createElement('button');
       b.className = 'd-opt';
-      b.textContent = sub(o.t);
+      b.textContent = sub(o.t, false);
       b.addEventListener('click', (e) => {
         e.stopPropagation();
         if (typing) finish();
         if (o.go) {
           cur = o.go;
           pickCall();
-          type(sub(nodes[cur].text));
+          type(sub(nodes[cur].text, true));
         } else {
           close();
         }
@@ -143,7 +146,7 @@ const DIALOG = (() => {
     root.classList.add('show');
     shownAt = Date.now();
     pickCall();
-    type(sub(nodes[cur].text));
+    type(sub(nodes[cur].text, true));
   }
 
   function close() {
