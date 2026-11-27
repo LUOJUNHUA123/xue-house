@@ -698,6 +698,26 @@
     max-height: calc(88 * var(--vh)); overflow-y: auto;
   }
   #note .n-tag { font-size: 10px; letter-spacing: 2.6px; color: #c4a082; margin-bottom: 9px; }
+  /* 长信：宽版卡片，正文左对齐、行距收紧、可滚动 */
+  #note .n-box.wide {
+    width: min(calc(92 * var(--vw)), 620px); text-align: left;
+    padding: 26px 30px 20px;
+    display: flex; flex-direction: column; max-height: calc(88 * var(--vh));
+  }
+  #note .n-box.wide .n-tag { text-align: center; flex: none; }
+  #note .n-box.wide .n-pic { flex: none; }
+  #note .n-box.wide .n-text {
+    flex: 1 1 auto; min-height: 0; overflow-y: auto; padding-right: 10px;
+    font-size: 13px; line-height: 1.92; letter-spacing: .3px;
+    color: #61412f; text-align: justify; text-justify: inter-ideograph;
+    scrollbar-width: thin; scrollbar-color: rgba(198,138,100,.5) transparent;
+  }
+  #note .n-box.wide .n-text::-webkit-scrollbar { width: 6px; }
+  #note .n-box.wide .n-text::-webkit-scrollbar-thumb {
+    background: rgba(198,138,100,.45); border-radius: 3px;
+  }
+  #note .n-box.wide .n-text::-webkit-scrollbar-track { background: transparent; }
+  #note .n-box.wide .n-ok { flex: none; display: block; margin: 16px auto 0; }
   #note .n-text { font-size: 14px; line-height: 1.95; color: #6b4a38; letter-spacing: .4px; white-space: pre-line; }
   #note .n-pic {
     margin: 15px auto 0; width: 100%; max-width: 260px; aspect-ratio: 4 / 3;
