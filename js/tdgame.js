@@ -54,15 +54,15 @@ const INTERACTS_BY_SCENE = {
   cottage: [
     { id: 'photo', label: '看看照片墙', hit: { x: 105, y: 25,  w: 90,  h: 65 },  stand: { x: 174, y: 156 }, face: 'up',    btn: { x: 150, y: 94 }  },
     { id: 'door',  label: '出门',       hit: { x: 232, y: 25,  w: 72,  h: 120 }, stand: { x: 252, y: 138 }, face: 'up',    btn: { x: 268, y: 133 } },
-    { id: 'bed',   label: '睡觉',       hit: { x: 40,  y: 168, w: 120, h: 88 },  stand: { x: 178, y: 212 }, face: 'left',  btn: { x: 100, y: 156 } },
+    { id: 'bed',   label: '睡觉',       hit: { x: 40,  y: 168, w: 120, h: 88 },  stand: { x: 178, y: 212 }, face: 'left',  btn: { x: 110, y: 175 } },
     { id: 'shelf', label: '看看书架',   hit: { x: 330, y: 45,  w: 86,  h: 90 },  stand: { x: 370, y: 145 }, face: 'up',    btn: { x: 373, y: 33 }  },
     { id: 'him',   label: '和他说说话', hit: { x: 386, y: 110, w: 26,  h: 86 },  stand: { x: 430, y: 200 }, face: 'left',  btn: { x: 399, y: 100 } },
-    { id: 'flower',label: '勿忘我',     hit: { x: 98,  y: 82,  w: 34,  h: 60 },  stand: { x: 126, y: 162 }, face: 'up',    btn: { x: 115, y: 72 }  },
+    { id: 'flower',label: '勿忘我',     hit: { x: 98,  y: 82,  w: 34,  h: 60 },  stand: { x: 126, y: 162 }, face: 'up',    btn: { x: 111, y: 87 }  },
     { id: 'cat',   label: '摸摸猫',     hit: { x: 196, y: 138, w: 30,  h: 28 },  stand: { x: 210, y: 170 }, face: 'left',  btn: { x: 211, y: 128 } },
     { id: 'dog',   label: '摸摸狗',     hit: { x: 162, y: 148, w: 30,  h: 30 },  stand: { x: 176, y: 180 }, face: 'left',  btn: { x: 177, y: 138 } },
     { id: 'gift',  label: '打开礼物',   hit: { x: 172, y: 86,  w: 32,  h: 28 },  stand: { x: 204, y: 178 }, face: 'up',    btn: { x: 188, y: 76 }  },
     { id: 'letter',label: '读这封信',   hit: { x: 142, y: 94,  w: 32,  h: 24 },  stand: { x: 152, y: 150 }, face: 'up',    btn: { x: 158, y: 84 }  },
-    { id: 'cake',  label: '吹蜡烛',     hit: { x: 285, y: 132, w: 56,  h: 40 },  stand: { x: 245, y: 185 }, face: 'right', btn: { x: 313, y: 121 } },
+    { id: 'cake',  label: '吹蜡烛',     hit: { x: 285, y: 132, w: 56,  h: 40 },  stand: { x: 245, y: 185 }, face: 'right', btn: { x: 316, y: 133 } },
   ],
   beach: [
     { id: 'him',   label: '和他说说话', hit: { x: 272, y: 138, w: 30,  h: 74 },  stand: { x: 248, y: 212 }, face: 'right', btn: { x: 287, y: 126 } },
