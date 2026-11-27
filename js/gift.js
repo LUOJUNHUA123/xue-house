@@ -350,6 +350,8 @@ const NOTE = (function () {
 
   function show(opt) {
     if (!root) return;
+    const box = root.querySelector('.n-box');
+    if (box) box.classList.toggle('wide', !!opt.wide);
     if (tagEl) tagEl.textContent = opt.tag || 'A LITTLE NOTE';
     textEl.textContent = opt.text || '';
     picEl.style.aspectRatio = opt.ratio || '';
