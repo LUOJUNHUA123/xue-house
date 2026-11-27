@@ -53,22 +53,22 @@ function checkNearCake() {
 const INTERACTS_BY_SCENE = {
   cottage: [
     { id: 'photo', label: '看看照片墙', hit: { x: 105, y: 25,  w: 90,  h: 65 },  stand: { x: 174, y: 156 }, face: 'up',    btn: { x: 150, y: 94 }  },
-    { id: 'door',  label: '出门',       hit: { x: 232, y: 25,  w: 72,  h: 120 }, stand: { x: 252, y: 138 }, face: 'up',    btn: { x: 250, y: 152 } },
-    { id: 'bed',   label: '睡觉',       hit: { x: 40,  y: 168, w: 120, h: 88 },  stand: { x: 178, y: 212 }, face: 'left',  btn: { x: 100, y: 152 } },
-    { id: 'shelf', label: '看看书架',   hit: { x: 330, y: 45,  w: 86,  h: 90 },  stand: { x: 370, y: 145 }, face: 'up',    btn: { x: 370, y: 38 }  },
-    { id: 'him',   label: '和他说说话', hit: { x: 386, y: 110, w: 26,  h: 86 },  stand: { x: 430, y: 200 }, face: 'left',  btn: { x: 400, y: 112 } },
-    { id: 'flower',label: '勿忘我',     hit: { x: 98,  y: 82,  w: 34,  h: 60 },  stand: { x: 126, y: 162 }, face: 'up',    btn: { x: 114, y: 74 }  },
-    { id: 'cat',   label: '摸摸猫',     hit: { x: 196, y: 138, w: 30,  h: 28 },  stand: { x: 210, y: 170 }, face: 'left',  btn: { x: 202, y: 140 } },
-    { id: 'dog',   label: '摸摸狗',     hit: { x: 162, y: 148, w: 30,  h: 30 },  stand: { x: 176, y: 180 }, face: 'left',  btn: { x: 168, y: 150 } },
-    { id: 'gift',  label: '打开礼物',   hit: { x: 172, y: 86,  w: 32,  h: 28 },  stand: { x: 204, y: 178 }, face: 'up',    btn: { x: 190, y: 78 }  },
-    { id: 'letter',label: '读这封信',   hit: { x: 142, y: 94,  w: 32,  h: 24 },  stand: { x: 152, y: 150 }, face: 'up',    btn: { x: 166, y: 90 }  },
-    { id: 'cake',  label: '吹蜡烛',     hit: { x: 285, y: 132, w: 56,  h: 40 },  stand: { x: 245, y: 185 }, face: 'right', btn: { x: 313, y: 126 } },
+    { id: 'door',  label: '出门',       hit: { x: 232, y: 25,  w: 72,  h: 120 }, stand: { x: 252, y: 138 }, face: 'up',    btn: { x: 268, y: 133 } },
+    { id: 'bed',   label: '睡觉',       hit: { x: 40,  y: 168, w: 120, h: 88 },  stand: { x: 178, y: 212 }, face: 'left',  btn: { x: 100, y: 156 } },
+    { id: 'shelf', label: '看看书架',   hit: { x: 330, y: 45,  w: 86,  h: 90 },  stand: { x: 370, y: 145 }, face: 'up',    btn: { x: 373, y: 33 }  },
+    { id: 'him',   label: '和他说说话', hit: { x: 386, y: 110, w: 26,  h: 86 },  stand: { x: 430, y: 200 }, face: 'left',  btn: { x: 399, y: 100 } },
+    { id: 'flower',label: '勿忘我',     hit: { x: 98,  y: 82,  w: 34,  h: 60 },  stand: { x: 126, y: 162 }, face: 'up',    btn: { x: 115, y: 72 }  },
+    { id: 'cat',   label: '摸摸猫',     hit: { x: 196, y: 138, w: 30,  h: 28 },  stand: { x: 210, y: 170 }, face: 'left',  btn: { x: 211, y: 128 } },
+    { id: 'dog',   label: '摸摸狗',     hit: { x: 162, y: 148, w: 30,  h: 30 },  stand: { x: 176, y: 180 }, face: 'left',  btn: { x: 177, y: 138 } },
+    { id: 'gift',  label: '打开礼物',   hit: { x: 172, y: 86,  w: 32,  h: 28 },  stand: { x: 204, y: 178 }, face: 'up',    btn: { x: 188, y: 76 }  },
+    { id: 'letter',label: '读这封信',   hit: { x: 142, y: 94,  w: 32,  h: 24 },  stand: { x: 152, y: 150 }, face: 'up',    btn: { x: 158, y: 84 }  },
+    { id: 'cake',  label: '吹蜡烛',     hit: { x: 285, y: 132, w: 56,  h: 40 },  stand: { x: 245, y: 185 }, face: 'right', btn: { x: 313, y: 121 } },
   ],
   beach: [
-    { id: 'him',   label: '和他说说话', hit: { x: 272, y: 138, w: 30,  h: 74 },  stand: { x: 248, y: 212 }, face: 'right', btn: { x: 286, y: 130 } },
-    { id: 'swing', label: '坐秋千',     hit: { x: 352, y: 84,  w: 92,  h: 104 }, stand: { x: 398, y: 196 }, face: 'up',    btn: { x: 398, y: 80 }  },
-    { id: 'house', label: '回小屋',     hit: { x: 0,   y: 73,  w: 46,  h: 56 },  stand: { x: 72,  y: 150 }, face: 'up',    btn: { x: 23,  y: 66 }  },
-    { id: 'sea',   label: '看海',       hit: { x: 60,  y: 96,  w: 300, h: 26 },  stand: { x: 212, y: 130 }, face: 'up',    btn: { x: 212, y: 88 }  },
+    { id: 'him',   label: '和他说说话', hit: { x: 272, y: 138, w: 30,  h: 74 },  stand: { x: 248, y: 212 }, face: 'right', btn: { x: 287, y: 126 } },
+    { id: 'swing', label: '坐秋千',     hit: { x: 352, y: 84,  w: 92,  h: 104 }, stand: { x: 398, y: 196 }, face: 'up',    btn: { x: 398, y: 74 }  },
+    { id: 'house', label: '回小屋',     hit: { x: 0,   y: 73,  w: 46,  h: 56 },  stand: { x: 72,  y: 150 }, face: 'up',    btn: { x: 23,  y: 62 }  },
+    { id: 'sea',   label: '看海',       hit: { x: 60,  y: 96,  w: 300, h: 26 },  stand: { x: 212, y: 130 }, face: 'up',    btn: { x: 210, y: 86 }  },
   ],
 };
 let INTERACTS = INTERACTS_BY_SCENE.cottage;
@@ -132,11 +132,6 @@ function updateNear() {
 const _actEl = () => document.getElementById('act');
 function _act2El() { return document.getElementById('act2'); }
 
-/* 互动按钮的家：固定在画面底部中央，不跟着物件跑。
-   以前每个物件自带 btn:{x,y}，走近谁按钮就跳到谁头上，一屋子东西显得很乱。 */
-const ACT_HOME = { x: 240, y: 247 };
-const ACT2_HOME = { x: 240, y: 215 };
-
 function updateAct() {
   const el = _actEl();
   const el2 = _act2El();
@@ -144,7 +139,7 @@ function updateAct() {
   if (state === 'wish') {
     if (el2) el2.classList.remove('show');
     if (!wishReady) { el.classList.remove('show'); return; }
-    const pW = logicToScreen(ACT_HOME.x, ACT_HOME.y);
+    const pW = logicToScreen(240, 270 * 0.93);
     el.style.left = pW.x + 'px';
     el.style.top = pW.y + 'px';
     const sp = el.firstElementChild;
@@ -157,7 +152,8 @@ function updateAct() {
     if (el2) el2.classList.remove('show');
     return;
   }
-  const bs = logicToScreen(ACT_HOME.x, ACT_HOME.y);
+  const b = btnPos(NEAR);
+  const bs = logicToScreen(b.x, b.y);
   const px = bs.x;
   const py = bs.y;
   el.style.left = px + 'px';
@@ -169,9 +165,13 @@ function updateAct() {
   /* 他在旁边时多给一个「说说话」，牵手和聊天不打架 */
   if (el2) {
     if (NEAR.id === 'him' && TD.scene !== 'beach') {
-      const b2 = logicToScreen(ACT2_HOME.x, ACT2_HOME.y);
-      el2.style.left = b2.x + 'px';
-      el2.style.top = b2.y + 'px';
+      if (VIEW_ROT) {
+        el2.style.left = (px - 36) + 'px';
+        el2.style.top = py + 'px';
+      } else {
+        el2.style.left = px + 'px';
+        el2.style.top = (py + 32) + 'px';
+      }
       const sp2 = el2.firstElementChild;
       if (sp2 && sp2.textContent !== '说说话') sp2.textContent = '说说话';
       el2.classList.add('show');
@@ -892,28 +892,6 @@ function update(dt) {
   hintAlpha += ((nearCake ? 1 : 0) - hintAlpha) * Math.min(1, dt * 12);
   updateNear();
   updateAct();
-}
-
-/* ---------- 靠近时浮出的互动按钮 ---------- */
-function drawNearBtn(ctx, t) {
-  if (!NEAR || state !== 'play') return;
-  const b = btnPos(NEAR);
-  const k = (Math.sin(t * 4.2) + 1) / 2;
-
-  ctx.globalAlpha = 0.14 + 0.14 * k;
-  P.ellipse(ctx, b.x, b.y, 10 + k * 1.6, 10 + k * 1.6, '#ffb6c8');
-  ctx.globalAlpha = 1;
-
-  P.ellipse(ctx, b.x, b.y + 1, 7.6, 7.6, 'rgba(120,60,80,0.18)');
-  P.ellipse(ctx, b.x, b.y, 7.6, 7.6, '#ffffff');
-  P.ellipse(ctx, b.x, b.y, 6.4, 6.4, '#ffd9e4');
-  P.ellipse(ctx, b.x, b.y - 0.6, 5.4, 5.4, '#ffeef4');
-
-  // 里面一颗小爱心
-  P.r(ctx, b.x - 2, b.y - 3, 2, 2, '#e8547a');
-  P.r(ctx, b.x + 1, b.y - 3, 2, 2, '#e8547a');
-  P.r(ctx, b.x - 1, b.y - 1, 3, 2, '#e8547a');
-  P.r(ctx, b.x, b.y + 1, 1, 1, '#e8547a');
 }
 
 /* ---------- 渲染 ---------- */
